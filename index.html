@@ -1,1 +1,57 @@
-
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我是胡桃的狗！</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐾 我是胡桃的狗！</h1>
+        </header>
+        
+        <main>
+            <div class="hu-tao-section">
+                <img src="hu-tao.png" alt="胡桃" class="hu-tao-img">
+                <div class="dialogue-bubble">汪汪！我是胡桃最忠实的伙伴!</div>
+            </div>
+            
+            <div class="facts">
+                <h2>★ 狗狗宣言 ★</h2>
+                <ul>
+                    <li>永远追随胡桃堂主！</li>
+                    <li>最爱吃胡桃给的骨头饼干</li>
+                    <li>会帮往生堂看大门</li>
+                    <li>讨厌七七（因为会抢胡桃注意）</li>
+                    <li>梦想是成为胡桃的专属飞行坐骑</li>
+                </ul>
+            </div>
+            
+            <button id="barkBtn">点击学狗叫</button>
+            <audio id="barkSound" src="bark.mp3"></audio>
+        </main>
+        
+        <footer>
+            <p>🐶 胡桃的专属狗狗社团 | 往生堂认证好狗</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.getElementById('barkBtn').addEventListener('click', function() {
+            document.getElementById('barkSound').play();
+            
+            // 添加临时动画效果
+            this.textContent = '汪汪汪!';
+            this.classList.add('barking');
+            setTimeout(() => {
+                this.textContent = '点击学狗叫';
+                this.classList.remove('barking');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
