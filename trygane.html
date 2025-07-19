@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub井字棋小游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 20px;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            padding: 25px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .game-info {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .game-info.win {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 8px;
+            margin: 20px auto;
+        }
+        
+        .cell {
+            background-color: #3498db;
+            border-radius: 10px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cell:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+        
+        .cell.x {
+            background-color: #e74c3c;
+        }
+        
+        .cell.o {
+            background-color: #27ae60;
+        }
+        
+        .btn {
+            background-color: #e74c3c;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .footer {
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>井字棋游戏</h1>
+        <div class="game-info" id="status">轮到 X 玩家</div>
+        
+        <div class="game-board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <button class="btn" id="reset">重新开始</button>
+        
+        <div class="footer">
+            将此HTML文件保存后上传至GitHub Pages即可在线游戏
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态变量
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        
+        // 胜利条件数组
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // 横向
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // 纵向
+            [0, 4, 8], [2, 4, 6]             // 对角线
+        ];
+        
+        // 获取DOM元素
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('status');
+        const resetButton = document.getElementById('reset');
+        
+        // 处理玩家移动
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = parseInt(cell.getAttribute('data-index'));
+            
+            // 检查格子是否已被占用或游戏已结束
+            if (gameBoard[index] !== '' || !gameActive) return;
+            
+            // 更新游戏状态
+            gameBoard[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
+            
+            // 检查胜负
+            if (checkWin()) {
+                statusDisplay.textContent = `玩家 ${currentPlayer} 获胜！`;
+                statusDisplay.classList.add('win');
+                gameActive = false;
+                return;
+            }
+            
+            // 检查平局
+            if (checkDraw()) {
+                statusDisplay.textContent = '游戏平局！';
+                gameActive = false;
+                return;
+            }
+            
+            // 切换玩家
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            statusDisplay.textContent = `轮到 ${currentPlayer} 玩家`;
+        }
+        
+        // 检查胜负
+        function checkWin() {
+            return winPatterns.some(pattern => {
+                return pattern.every(index => {
+                    return gameBoard[index] === currentPlayer;
+                });
+            });
+        }
+        
+        // 检查平局
+        function checkDraw() {
+            return gameBoard.every(cell => cell !== '');
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            currentPlayer = 'X';
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+            });
+            
+            statusDisplay.textContent = `轮到 ${currentPlayer} 玩家`;
+            statusDisplay.classList.remove('win');
+        }
+        
+        // 添加事件监听器
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        
+        resetButton.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
